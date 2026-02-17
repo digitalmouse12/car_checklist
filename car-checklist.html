@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Buying Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --accent: #4f8ef7;
+    --accent2: #34d399;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e8eaf0;
+    --text-muted: #8892a4;
+    --border: #2a2f45;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  header {
+    padding: 20px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .car-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .progress-bar {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 6px;
+    margin: 16px 0 0;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .section {
+    margin-bottom: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--surface);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .section-header:active {
+    background: var(--surface2);
+  }
+
+  .section-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .section-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .section-count.done {
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--accent2);
+  }
+
+  .chevron {
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+
+  .section.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  .section-body {
+    display: none;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+
+  .section.open .section-body {
+    display: block;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+  }
+
+  .check-item:last-child {
+    border-bottom: none;
+  }
+
+  .check-item:active {
+    background: var(--surface2);
+  }
+
+  .check-item.checked {
+    opacity: 0.5;
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: var(--bg);
+  }
+
+  .check-item.checked .checkbox {
+    background: var(--accent2);
+    border-color: var(--accent2);
+  }
+
+  .checkmark {
+    display: none;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .check-item.checked .checkmark {
+    display: block;
+  }
+
+  .check-content {
+    flex: 1;
+  }
+
+  .check-label {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+
+  .check-item.checked .check-label {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+
+  .check-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .tag-red { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .tag-yellow { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .tag-green { background: rgba(52,211,153,0.15); color: #34d399; }
+  .tag-blue { background: rgba(79,142,247,0.15); color: #4f8ef7; }
+
+  .key-numbers {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+
+  .key-numbers h3 {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .number-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .number-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .number-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .number-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .number-item.highlight {
+    border-color: var(--accent2);
+    background: rgba(52,211,153,0.05);
+  }
+
+  .number-item.highlight .number-value {
+    color: var(--accent2);
+    font-size: 15px;
+  }
+
+  .script-box {
+    background: var(--bg);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 12px;
+    margin-top: 6px;
+  }
+
+  .script-label {
+    font-size: 10px;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+
+  .script-text {
+    font-size: 13px;
+    color: var(--text);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .reset-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 8px;
+    margin-bottom: 32px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .reset-btn:active {
+    background: var(--surface2);
+  }
+
+  .vin-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin: 8px 14px;
+    text-align: center;
+  }
+
+  .all-done {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    background: rgba(52,211,153,0.1);
+    border: 1px solid var(--accent2);
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+
+  .all-done .emoji {
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+
+  .all-done h2 {
+    font-size: 18px;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .all-done p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="car-badge">🚗 VIN: 7FARS6H88TE068927</div>
+  <h1>Dealership Checklist</h1>
+  <p class="subtitle">2026 Honda CR-V Hybrid Sport-L · Urban Gray Pearl</p>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">0 of 40 completed</div>
+</header>
+
+<!-- Key Numbers -->
+<div class="key-numbers">
+  <h3>🔑 Key Numbers</h3>
+  <div class="number-grid">
+    <div class="number-item">
+      <div class="number-label">Vehicle Price</div>
+      <div class="number-value">$39,899</div>
+    </div>
+    <div class="number-item">
+      <div class="number-label">Tax</div>
+      <div class="number-value">$4,408.84</div>
+    </div>
+    <div class="number-item">
+      <div class="number-label">Registration</div>
+      <div class="number-value">$875.00</div>
+    </div>
+    <div class="number-item">
+      <div class="number-label">Doc Fee</div>
+      <div class="number-value">$200.00</div>
+    </div>
+    <div class="number-item highlight" style="grid-column: span 2">
+      <div class="number-label">Total OTD (nothing more!)</div>
+      <div class="number-value">$45,385.34</div>
+    </div>
+    <div class="number-item">
+      <div class="number-label">Chase APR</div>
+      <div class="number-value">5.55%</div>
+    </div>
+    <div class="number-item">
+      <div class="number-label">Monthly (60mo)</div>
+      <div class="number-value">~$867</div>
+    </div>
+  </div>
+</div>
+
+<div class="all-done" id="allDone">
+  <div class="emoji">🎉</div>
+  <h2>All checks done!</h2>
+  <p>You're ready to sign and drive away in your new CR-V!</p>
+</div>
+
+<!-- Section 1: Before You Go In -->
+<div class="section open" id="s1">
+  <div class="section-header" onclick="toggleSection('s1')">
+    <div class="section-icon" style="background:rgba(79,142,247,0.15)">📋</div>
+    <div class="section-title">Before You Go In</div>
+    <div class="section-count" id="count-s1">0/3</div>
+    <div class="chevron">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Call Pemco to add the CR-V</div>
+        <div class="check-note">VIN: 7FARS6H88TE068927 · Add Chase as lienholder if financing · Get proof of insurance on your phone</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Have Danon's email quote ready</div>
+        <div class="check-note">Screenshot or email showing $45,385.34 OTD. Reference this if anything looks different.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Have Chase pre-approval ready</div>
+        <div class="check-note">5.55% for 60 months · Give dealer your name + last 4 SSN to look it up</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 2: Meet Timur -->
+<div class="section" id="s2">
+  <div class="section-header" onclick="toggleSection('s2')">
+    <div class="section-icon" style="background:rgba(52,211,153,0.15)">👋</div>
+    <div class="section-title">Meet Timur</div>
+    <div class="section-count" id="count-s2">0/2</div>
+    <div class="chevron">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Confirm the deal upfront</div>
+        <div class="check-note">Reference Danon's quote immediately.</div>
+        <div class="script-box">
+          <div class="script-label">Say this</div>
+          <div class="script-text">"Hi Timur! Danon sent us the quote for $45,385.34 OTD for the Urban Gray Sport-L. We're ready to move forward with that."</div>
+        </div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Ask for a feature tour</div>
+        <div class="check-note">Let Timur walk you through everything - totally normal and expected.</div>
+        <div class="script-box">
+          <div class="script-label">Say this</div>
+          <div class="script-text">"Could you give us a quick feature tour before the test drive?"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 3: Exterior Inspection -->
+<div class="section" id="s3">
+  <div class="section-header" onclick="toggleSection('s3')">
+    <div class="section-icon" style="background:rgba(245,158,11,0.15)">🔍</div>
+    <div class="section-title">Exterior Inspection</div>
+    <div class="section-count" id="count-s3">0/7</div>
+    <div class="chevron">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="vin-box">Confirm VIN: 7FARS6H88TE068927</div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">VIN matches on dashboard & door jamb</div>
+        <div class="check-note">Check windshield (dashboard) and driver door jamb sticker</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Odometer under 50 miles</div>
+        <div class="check-note">Expect 5-20 miles from test drives. Under 50 is fine for a lot-sitter.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Correct color: Urban Gray Pearl</div>
+        <div class="check-note">Black wheels, black trim, gray exterior</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">No scratches or paint chips</div>
+        <div class="check-note">Check all panels: hood, doors, roof, bumpers. Take photos of anything you find.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">No dents or body damage</div>
+        <div class="check-note">Look at panels from different angles in good lighting</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">All glass intact (no chips or cracks)</div>
+        <div class="check-note">Windshield, windows, sunroof glass</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Window sticker (Monroney) on window</div>
+        <div class="check-note">Should show MSRP $42,130 and all features. Confirms it's brand new.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 4: Interior & Features -->
+<div class="section" id="s4">
+  <div class="section-header" onclick="toggleSection('s4')">
+    <div class="section-icon" style="background:rgba(79,142,247,0.15)">🪑</div>
+    <div class="section-title">Interior & Features</div>
+    <div class="section-count" id="count-s4">0/9</div>
+    <div class="chevron">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Black leather interior (no damage)</div>
+        <div class="check-note">Check seats, dashboard, door panels for any marks or stains</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Wireless CarPlay connects</div>
+        <div class="check-note">Connect your iPhone wirelessly - no cable needed. Test maps and music.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Heated seats work (both sides)</div>
+        <div class="check-note">Driver and passenger - check both heat settings</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Moonroof opens and closes smoothly</div>
+        <div class="check-note">No grinding or hesitation</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">All windows work</div>
+        <div class="check-note">Test all 4 windows up and down</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Power liftgate works</div>
+        <div class="check-note">Open and close fully</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">AC/heat works on both zones</div>
+        <div class="check-note">Front dual zone - test driver and passenger sides</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Backup camera clear and working</div>
+        <div class="check-note">Put in reverse and check display quality</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">No warning lights on dashboard</div>
+        <div class="check-note">All clear at startup. Any orange/red lights = ask Timur immediately.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 5: Test Drive - Hybrid System -->
+<div class="section" id="s5">
+  <div class="section-header" onclick="toggleSection('s5')">
+    <div class="section-icon" style="background:rgba(52,211,153,0.15)">⚡</div>
+    <div class="section-title">Test Drive: Hybrid System</div>
+    <div class="section-count" id="count-s5">0/6</div>
+    <div class="chevron">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="tag tag-green">NORMAL</div>
+        <div class="check-label">Quiet/silent pull from a stop</div>
+        <div class="check-note">Electric motor at low speeds = near silent. This is good!</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="tag tag-green">NORMAL</div>
+        <div class="check-label">Engine turns on/off while driving</div>
+        <div class="check-note">Gas engine kicks in when needed. Subtle change in sound is totally normal.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="tag tag-green">NORMAL</div>
+        <div class="check-label">Engine revs while car moves slowly</div>
+        <div class="check-note">Charging the battery. Sounds disconnected from speed. Normal for Honda hybrid!</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Smooth transitions between modes</div>
+        <div class="check-note">No harsh jerking or clunking when gas/electric switch. Subtle is normal.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Battery gauge moves on dashboard</div>
+        <div class="check-note">Should go up (braking/coasting) and down (acceleration). Not moving at all = issue.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="tag tag-red">WATCH FOR</div>
+        <div class="check-label">No warning lights or error messages</div>
+        <div class="check-note">Hybrid system warning, battery warning, check engine = stop and ask Timur.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 6: Test Drive - Driving Feel -->
+<div class="section" id="s6">
+  <div class="section-header" onclick="toggleSection('s6')">
+    <div class="section-icon" style="background:rgba(245,158,11,0.15)">🛣️</div>
+    <div class="section-title">Test Drive: Driving Feel</div>
+    <div class="section-count" id="count-s6">0/5</div>
+    <div class="chevron">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Smooth, consistent acceleration</div>
+        <div class="check-note">Try gentle, moderate, and firm acceleration. No hesitation or lurching.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Brakes feel consistent and smooth</div>
+        <div class="check-note">Brakes will feel slightly different than gas car (regen braking) - normal. No grinding.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Car doesn't pull left or right</div>
+        <div class="check-note">On a straight road, should go straight without input</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">No unusual noises or vibrations</div>
+        <div class="check-note">Listen for knocking, grinding, rattling. Feel for vibrations in steering wheel.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Adaptive cruise control works</div>
+        <div class="check-note">Test on a straight road if possible</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 7: Finance Office -->
+<div class="section" id="s7">
+  <div class="section-header" onclick="toggleSection('s7')">
+    <div class="section-icon" style="background:rgba(239,68,68,0.15)">📝</div>
+    <div class="section-title">Finance Office</div>
+    <div class="section-count" id="count-s7">0/6</div>
+    <div class="chevron">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="tag tag-red">MUST MATCH</div>
+        <div class="check-label">Vehicle price: $39,899</div>
+        <div class="check-note">If different: "My quote shows $39,899. Please correct this."</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="tag tag-red">MUST MATCH</div>
+        <div class="check-label">Total OTD: $45,385.34</div>
+        <div class="check-note">Tax $4,408.84 + Reg $875 + Doc $200 + Admin $2.50. Not a penny more.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="tag tag-red">MUST MATCH</div>
+        <div class="check-label">NO add-ons on contract</div>
+        <div class="check-note">Watch for: KARR, GAP, service contract, paint protection, prep fee, VIN etching, nitrogen tires, or ANYTHING you don't recognize.</div>
+        <div class="script-box">
+          <div class="script-label">Say this for any extra</div>
+          <div class="script-text">"This wasn't in my quote from Danon. Please remove it."</div>
+        </div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="tag tag-blue">IF FINANCING</div>
+        <div class="check-label">Chase rate: 5.55% / 60 months</div>
+        <div class="check-note">Give name + last 4 SSN. Monthly payment ~$867. Don't let them change the term or rate.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Read EVERY line before signing</div>
+        <div class="check-note">Take 30+ minutes if needed. "I need time to read this carefully." They can't rush you.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Say NO to everything they offer</div>
+        <div class="check-note">They'll offer service contract, GAP, protection plans. One firm answer works:</div>
+        <div class="script-box">
+          <div class="script-label">Say this</div>
+          <div class="script-text">"No thank you. I just want exactly what's in the quote."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 8: Before You Drive Away -->
+<div class="section" id="s8">
+  <div class="section-header" onclick="toggleSection('s8')">
+    <div class="section-icon" style="background:rgba(52,211,153,0.15)">🎉</div>
+    <div class="section-title">Before You Drive Away</div>
+    <div class="section-count" id="count-s8">0/2</div>
+    <div class="chevron">▼</div>
+  </div>
+  <div class="section-body">
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Get copies of everything</div>
+        <div class="check-note">Purchase agreement, loan documents, warranty docs, window sticker. All keys/fobs (should be 2).</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="check-content">
+        <div class="check-label">Show proof of insurance</div>
+        <div class="check-note">Pemco confirmation on your phone. Must have before driving off the lot.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="reset-btn" onclick="resetAll()">↺ Reset All Checkboxes</button>
+
+<script>
+  const TOTAL_ITEMS = 40;
+
+  function countSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const items = section.querySelectorAll('.check-item');
+    const checked = section.querySelectorAll('.check-item.checked');
+    return { total: items.length, checked: checked.length };
+  }
+
+  function updateProgress() {
+    let totalChecked = 0;
+    ['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(id => {
+      const { total, checked } = countSection(id);
+      const countEl = document.getElementById('count-' + id);
+      countEl.textContent = checked + '/' + total;
+      countEl.className = 'section-count' + (checked === total ? ' done' : '');
+      totalChecked += checked;
+    });
+
+    const pct = Math.round((totalChecked / TOTAL_ITEMS) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = totalChecked + ' of ' + TOTAL_ITEMS + ' completed';
+
+    const allDone = document.getElementById('allDone');
+    allDone.style.display = totalChecked === TOTAL_ITEMS ? 'block' : 'none';
+  }
+
+  function toggle(item) {
+    item.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function toggleSection(id) {
+    const section = document.getElementById(id);
+    section.classList.toggle('open');
+  }
+
+  function resetAll() {
+    document.querySelectorAll('.check-item.checked').forEach(item => {
+      item.classList.remove('checked');
+    });
+    updateProgress();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
